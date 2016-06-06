@@ -1,0 +1,17 @@
+{
+    "name": "brammittendorff/instacraft",
+    "description": "An instagram image puller for Craft CMS with and without OAuth",
+    "authors": [
+        {
+            "name": "Bram Mittendorff",
+            "email": "bram@nerds.company",
+            "homepage": "http://github.com/brammittendorff",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "type": "craft-plugin",
+    "require": {
+        "composer/installers": "~1.0"
+    }
+}
