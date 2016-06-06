@@ -1,2 +1,2 @@
 # instacraft
-An instagram image puller for Craft CMS with and without OAuth
+An instagram image puller for Craft CMS without OAuth
