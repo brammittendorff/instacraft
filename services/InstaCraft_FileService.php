@@ -22,11 +22,11 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     private $tempFile;
 
-  	private $mimeTypes = array(
-    		'image/gif' 	=> '.gif',
-    		'image/jpeg' 	=> '.jpg',
-    		'image/png' 	=> '.png'
-  	);
+    private $mimeTypes = array(
+            'image/gif'    => '.gif',
+            'image/jpeg'    => '.jpg',
+            'image/png'    => '.png'
+    );
 
     public function save($folderId, $url)
     {
@@ -51,26 +51,26 @@ class InstaCraft_FileService extends BaseApplicationComponent
                     $path = pathinfo($url);
 
                     $addExtension = "";
-            	    	if (empty($path["extension"])) {
-            	    		  $addExtension = $this->mimeTypes[$size["mime"]];
-            	    	}
+                    if (empty($path["extension"])) {
+                        $addExtension = $this->mimeTypes[$size["mime"]];
+                    }
 
                     // give the image the correct name
                     $tempPath = craft()->path->getTempPath();
-              			$this->tempFile = $tempPath.basename($url).$addExtension;
+                    $this->tempFile = $tempPath.basename($url).$addExtension;
                     $this->tempFile = explode("?", $this->tempFile)[0];
 
                     // download image
-              			$newImageData = $this->download($url);
-              			IOHelper::writeToFile($this->tempFile, $newImageData);
+                          $newImageData = $this->download($url);
+                    IOHelper::writeToFile($this->tempFile, $newImageData);
 
                     // export tmp file to source
                     $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
 
                     // cleanup tmp image
-              			$this->deleteTempFiles($this->tempFile);
+                          $this->deleteTempFiles($this->tempFile);
 
-              			return true;
+                    return true;
                 }
             }
         }
@@ -138,6 +138,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
      */
     private function deleteTempFiles($fileName)
     {
-		    IOHelper::deleteFile($fileName, true);
+        IOHelper::deleteFile($fileName, true);
     }
 }
