@@ -1,6 +1,6 @@
 {
     "name": "brammittendorff/instacraft",
-    "description": "An instagram image puller for Craft CMS with and without OAuth",
+    "description": "An instagram image puller for Craft CMS without OAuth",
     "authors": [
         {
             "name": "Bram Mittendorff",
