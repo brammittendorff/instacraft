@@ -28,7 +28,7 @@ class InstaCraftPlugin extends BasePlugin
      */
     public function getDescription()
     {
-        return Craft::t('An instagram image puller for Craft CMS with and without OAuth');
+        return Craft::t('An instagram image puller for Craft CMS without OAuth');
     }
     /**
      * Get plugin version.

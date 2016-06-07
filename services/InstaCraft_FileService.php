@@ -34,11 +34,23 @@ class InstaCraft_FileService extends BaseApplicationComponent
             $list = $this->instagramImagesToArray($url);
 
             if ($list) {
+                $settings = array();
                 foreach ($list as $url) {
-                    $this->grabUrl($folderId, $url);
+                    // Settings
+                    $settings = array_merge(array(
+                        'folderId' => $folderId,
+                        'total' => count($list),
+                        'url' => $url
+                    ), $settings);
+
+                    $task = craft()->tasks->createTask('InstaCraft', Craft::t('Downloading: ').' '.$url, $settings);
+                    craft()->userSession->setNotice(Craft::t('Download started.'));
+
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     public function grabUrl($folderId, $url)
@@ -46,35 +58,38 @@ class InstaCraft_FileService extends BaseApplicationComponent
         $size = getimagesize($url);
         // if image is valid in php
         if (!empty($size) && !empty($size["mime"])) {
-            if (craft()->userSession->isLoggedIn()) {
-                if ($this->mimeTypes[$size["mime"]]) {
-                    $path = pathinfo($url);
+            if ($this->mimeTypes[$size["mime"]]) {
+                $path = pathinfo($url);
 
-                    $addExtension = "";
-                    if (empty($path["extension"])) {
-                        $addExtension = $this->mimeTypes[$size["mime"]];
-                    }
-
-                    // give the image the correct name
-                    $tempPath = craft()->path->getTempPath();
-                    $this->tempFile = $tempPath.basename($url).$addExtension;
-                    $this->tempFile = explode("?", $this->tempFile)[0];
-
-                    // download image
-                          $newImageData = $this->download($url);
-                    IOHelper::writeToFile($this->tempFile, $newImageData);
-
-                    // export tmp file to source
-                    $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
-
-                    // cleanup tmp image
-                          $this->deleteTempFiles($this->tempFile);
-
-                    return true;
+                $addExtension = "";
+                if (empty($path["extension"])) {
+                    $addExtension = $this->mimeTypes[$size["mime"]];
                 }
+
+                // give the image the correct name
+                $tempPath = craft()->path->getTempPath();
+                $this->tempFile = $tempPath.basename($url).$addExtension;
+                $this->tempFile = explode("?", $this->tempFile)[0];
+
+                // download image
+                $newImageData = $this->download($url);
+                IOHelper::writeToFile($this->tempFile, $newImageData);
+
+                // export tmp file to source
+                $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
+
+                // cleanup tmp image
+                $this->deleteTempFiles($this->tempFile);
+
+                return true;
             }
         }
         return false;
+    }
+
+    public function finishedUrl()
+    {
+        craft()->userSession->setNotice(Craft::t('Download finished.'));
     }
 
     public function download($url, $saveHeaders=false, $proxy=null)
@@ -132,10 +147,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
-    /**
-     * Deletes temp files
-     * @param  [string] $fileName [A filename to delete]
-     */
     private function deleteTempFiles($fileName)
     {
         IOHelper::deleteFile($fileName, true);
