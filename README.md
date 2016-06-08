@@ -6,4 +6,4 @@ An instagram image puller for Craft CMS without OAuth. You can download the imag
 
 You can install this plugin with composer. This will install your plugin automatically in the craft plugins folder.
 
-```composre require brammittendorff/instacraft```
+```composer require brammittendorff/instacraft```
