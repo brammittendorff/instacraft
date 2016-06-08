@@ -8,7 +8,6 @@ class InstaCraft_FileTask extends BaseTask
     {
         return array(
             'folderId' => AttributeType::Number,
-            'total' => AttributeType::Number,
             'url' => AttributeType::String,
         );
     }

@@ -38,11 +38,10 @@ class InstaCraft_FileService extends BaseApplicationComponent
                     $instagramUrl = explode('?', $url)[0];
                     craft()->tasks->createTask('InstaCraft_File', Craft::t('Downloading: ').$instagramUrl, array(
                         'folderId' => (int)$folderId,
-                        'total' => count($list),
                         'url' => $url
                     ));
-                    craft()->userSession->setNotice(Craft::t('Download started.'));
                 }
+                craft()->userSession->setNotice(Craft::t('Downloading started.'));
             }
         }
     }
