@@ -13,7 +13,7 @@ class InstaCraft_FileController extends BaseController
         if (craft()->userSession->isLoggedIn()) {
             craft()->instaCraft_file->save($source, $url);
             // test
-            
+
         } else {
             // you are not logged in
         }

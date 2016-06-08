@@ -31,29 +31,23 @@ class InstaCraft_FileService extends BaseApplicationComponent
     public function save($folderId, $url)
     {
         if (!filter_var($url, FILTER_VALIDATE_URL) === false) {
-            $list = $this->instagramImagesToArray($url);
+            $list = $this->scrape($url);
 
             if ($list) {
-                $settings = array();
                 foreach ($list as $url) {
-                    // Settings
-                    $settings = array_merge(array(
-                        'folderId' => $folderId,
+                    $instagramUrl = explode('?', $url)[0];
+                    craft()->tasks->createTask('InstaCraft_File', Craft::t('Downloading: ').$instagramUrl, array(
+                        'folderId' => (int)$folderId,
                         'total' => count($list),
                         'url' => $url
-                    ), $settings);
-
-                    $task = craft()->tasks->createTask('InstaCraft', Craft::t('Downloading: ').' '.$url, $settings);
+                    ));
                     craft()->userSession->setNotice(Craft::t('Download started.'));
-
-                    return true;
                 }
             }
         }
-        return false;
     }
 
-    public function grabUrl($folderId, $url)
+    public function generate($folderId, $url)
     {
         $size = getimagesize($url);
         // if image is valid in php
@@ -87,12 +81,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
-    public function finishedUrl()
-    {
-        craft()->userSession->setNotice(Craft::t('Download finished.'));
-    }
-
-    public function download($url, $saveHeaders=false, $proxy=null)
+    private function download($url, $saveHeaders=false, $proxy=null)
     {
         if (!empty($url)) {
             $contextvariables = array(
@@ -118,7 +107,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
         }
     }
 
-    public function instagramImagesToArray($url=null)
+    public function scrape($url=null)
     {
         $data = $this->download($url);
 
