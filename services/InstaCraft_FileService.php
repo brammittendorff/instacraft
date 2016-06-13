@@ -28,6 +28,12 @@ class InstaCraft_FileService extends BaseApplicationComponent
             'image/png'    => '.png'
     );
 
+    /**
+     * Create a task to save an image to a specified folder / source
+     * @param  int $folderId    The id of the folder where the images must be stored
+     * @param  string $url      The url of the instagram image
+     * @return boolean          Returns true if every url in the list is looped
+     */
     public function save($folderId, $url)
     {
         if (!filter_var($url, FILTER_VALIDATE_URL) === false) {
@@ -43,9 +49,18 @@ class InstaCraft_FileService extends BaseApplicationComponent
                 }
                 craft()->userSession->setNotice(Craft::t('Downloading started.'));
             }
+
+            return true;
         }
+        return false;
     }
 
+    /**
+     * Download an image to a local dir and move this to a given source
+     * @param  int $folderId      The id of the folder where the images must be stored
+     * @param  string $url        The url of the instagram image
+     * @return boolean            This will return true if everything is fine and false if it is not a valid image
+     */
     public function generate($folderId, $url)
     {
         $size = getimagesize($url);
@@ -80,6 +95,13 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
+    /**
+     * Download an url with a random useragent
+     * @param  string $url          The url to download
+     * @param  boolean $saveHeaders If you want the headers to be stored in a static variable set this to true
+     * @param  string $proxy        You can put a proxy here to make requests with a proxy
+     * @return mixed                This returns false if the url is empty. And this will return the request result if everything is going well
+     */
     private function download($url, $saveHeaders=false, $proxy=null)
     {
         if (!empty($url)) {
@@ -106,6 +128,11 @@ class InstaCraft_FileService extends BaseApplicationComponent
         }
     }
 
+    /**
+     * Scrape the json from an instagram page and return this to an array
+     * @param  string $url  You need to put a valid instagram url in this variable
+     * @return mixed        This will return an array with instagram profile images
+     */
     public function scrape($url=null)
     {
         $data = $this->download($url);
@@ -135,6 +162,10 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
+    /**
+     * Delete a file
+     * @param string
+     */
     private function deleteTempFiles($fileName)
     {
         IOHelper::deleteFile($fileName, true);

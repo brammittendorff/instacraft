@@ -4,6 +4,10 @@ namespace Craft;
 class InstaCraft_FileTask extends BaseTask
 {
 
+    /**
+     * Defined settings
+     * @return array
+     */
     protected function defineSettings()
     {
         return array(
@@ -12,17 +16,29 @@ class InstaCraft_FileTask extends BaseTask
         );
     }
 
+    /**
+     * Return description
+     * @return string
+     */
     public function getDescription()
     {
         return Craft::t('Instagram download');
     }
 
-
+    /**
+     * Total steps to run
+     * @return int
+     */
     public function getTotalSteps()
     {
         return 1;
     }
 
+    /**
+     * Run each step
+     * @param  int  $step
+     * @return boolean
+     */
     public function runStep($step)
     {
         $settings = $this->getSettings();
