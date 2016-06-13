@@ -37,7 +37,7 @@ class InstaCraftPlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '0.1.2';
+        return '0.1.3';
     }
     /**
      * Get plugin developer.
