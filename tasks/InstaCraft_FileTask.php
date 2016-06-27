@@ -31,7 +31,7 @@ class InstaCraft_FileTask extends BaseTask
      */
     public function getTotalSteps()
     {
-        return 1;
+        return 4;
     }
 
     /**
@@ -42,6 +42,20 @@ class InstaCraft_FileTask extends BaseTask
     public function runStep($step)
     {
         $settings = $this->getSettings();
-        return craft()->instaCraft_file->generate($settings->folderId, $settings->url);
+
+        switch ($step) {
+            case 0:
+                return craft()->instaCraft_file->renameImage($settings->url);
+            break;
+            case 1:
+                return craft()->instaCraft_file->downloadImage($settings->url);
+            break;
+            case 2:
+                return craft()->instaCraft_file->moveImage($settings->folderId);
+            break;
+            case 3:
+                return craft()->instaCraft_file->removeTmpImage();
+            break;
+        }
     }
 }

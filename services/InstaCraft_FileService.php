@@ -55,14 +55,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
-    /**
-     * Download an image to a local dir and move this to a given source
-     * @param  int $folderId      The id of the folder where the images must be stored
-     * @param  string $url        The url of the instagram image
-     * @return boolean            This will return true if everything is fine and false if it is not a valid image
-     */
-    public function generate($folderId, $url)
-    {
+    public function renameImage($url) {
         $size = getimagesize($url);
         // if image is valid in php
         if (!empty($size) && !empty($size["mime"])) {
@@ -74,25 +67,32 @@ class InstaCraft_FileService extends BaseApplicationComponent
                     $addExtension = $this->mimeTypes[$size["mime"]];
                 }
 
-                // give the image the correct name
                 $tempPath = craft()->path->getTempPath();
                 $this->tempFile = $tempPath.basename($url).$addExtension;
                 $this->tempFile = explode("?", $this->tempFile)[0];
-
-                // download image
-                $newImageData = $this->download($url);
-                IOHelper::writeToFile($this->tempFile, $newImageData);
-
-                // export tmp file to source
-                $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
-
-                // cleanup tmp image
-                $this->deleteTempFiles($this->tempFile);
 
                 return true;
             }
         }
         return false;
+    }
+
+    public function downloadImage($url) {
+        $newImageData = $this->download($url);
+        return IOHelper::writeToFile($this->tempFile, $newImageData);
+    }
+
+    public function moveImage($folderId) {
+        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
+        if (!empty($response)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function removeTmpImage() {
+        return $this->deleteTempFiles($this->tempFile);
     }
 
     /**
@@ -168,6 +168,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
      */
     private function deleteTempFiles($fileName)
     {
-        IOHelper::deleteFile($fileName, true);
+        return IOHelper::deleteFile($fileName, true);
     }
 }
