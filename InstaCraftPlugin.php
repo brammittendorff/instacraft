@@ -21,6 +21,7 @@ class InstaCraftPlugin extends BasePlugin
     {
         return Craft::t('InstaCraft');
     }
+
     /**
      * Get plugin description.
      *
@@ -28,8 +29,9 @@ class InstaCraftPlugin extends BasePlugin
      */
     public function getDescription()
     {
-        return Craft::t('An instagram image puller for Craft CMS without OAuth');
+        return Craft::t('An automatic instagram image puller for Craft CMS without OAuth');
     }
+
     /**
      * Get plugin version.
      *
@@ -37,8 +39,9 @@ class InstaCraftPlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '0.1.5';
+        return '1.0.0';
     }
+
     /**
      * Get plugin developer.
      *
@@ -48,6 +51,7 @@ class InstaCraftPlugin extends BasePlugin
     {
         return 'Bram Mittendorff';
     }
+
     /**
      * Get plugin developer url.
      *
@@ -57,6 +61,7 @@ class InstaCraftPlugin extends BasePlugin
     {
         return 'https://www.nerds.company';
     }
+
     /**
      * Get plugin documentation url.
      *
@@ -66,6 +71,7 @@ class InstaCraftPlugin extends BasePlugin
     {
         return 'https://github.com/brammittendorff/instacraft';
     }
+
     /**
      * Has Control Panel section.
      *
@@ -75,4 +81,20 @@ class InstaCraftPlugin extends BasePlugin
     {
         return true;
     }
+
+    protected function defineSettings()
+    {
+        return array(
+          'cronjobUrl' => array(AttributeType::String, 'default' => ''),
+          'cronjobFolderId' => array(AttributeType::String, 'default' => '')
+        );
+    }
+
+    public function getSettingsHtml()
+    {
+        return craft()->templates->render('instacraft/settings', array(
+          'settings' => $this->getSettings()
+        ));
+    }
+
 }

@@ -11,7 +11,9 @@ class InstaCraft_FileModel extends BaseModel
     {
         return array(
             'folderId' => AttributeType::Number,
+            'imageId' => AttributeType::String,
             'url' => AttributeType::String,
+            'text' => AttributeType::String,
         );
     }
 }

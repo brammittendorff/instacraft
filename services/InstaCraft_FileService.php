@@ -23,9 +23,9 @@ class InstaCraft_FileService extends BaseApplicationComponent
     private $tempFile;
 
     private $mimeTypes = array(
-            'image/gif'    => '.gif',
-            'image/jpeg'    => '.jpg',
-            'image/png'    => '.png'
+        'image/gif'    => '.gif',
+        'image/jpeg'    => '.jpg',
+        'image/png'    => '.png'
     );
 
     /**
@@ -37,17 +37,20 @@ class InstaCraft_FileService extends BaseApplicationComponent
     public function save($folderId, $url)
     {
         if (!filter_var($url, FILTER_VALIDATE_URL) === false) {
-            $list = $this->scrape($url);
+            $list = $this->scrape($folderId, $url);
 
             if ($list) {
-                foreach ($list as $url) {
-                    $instagramUrl = explode('?', $url)[0];
-                    craft()->tasks->createTask('InstaCraft_File', Craft::t('Downloading: ').$instagramUrl, array(
+                foreach ($list as $object) {
+                    craft()->tasks->createTask('InstaCraft_File', Craft::t('Downloading: ').$object['display_src'], array(
                         'folderId' => (int)$folderId,
-                        'url' => $url
+                        'imageId' => $object['id'],
+                        'url' => $object['display_src'],
+                        'text' => $object['caption'],
                     ));
                 }
-                craft()->userSession->setNotice(Craft::t('Downloading started.'));
+                if (craft()->userSession->getUser()) {
+                    craft()->userSession->setNotice(Craft::t('Downloading started.'));
+                }
             }
 
             return true;
@@ -55,35 +58,34 @@ class InstaCraft_FileService extends BaseApplicationComponent
         return false;
     }
 
-    public function renameImage($url) {
+    /**
+     * Download the image
+     * @param  string $url  A url to download
+     * @return mixed        return if it saved the image
+     */
+    public function downloadImage($url) {
         $size = getimagesize($url);
         // if image is valid in php
         if (!empty($size) && !empty($size["mime"])) {
-            if ($this->mimeTypes[$size["mime"]]) {
-                $path = pathinfo($url);
-
-                $addExtension = "";
-                if (empty($path["extension"])) {
-                    $addExtension = $this->mimeTypes[$size["mime"]];
-                }
-
-                $tempPath = craft()->path->getTempPath();
-                $this->tempFile = $tempPath.basename($url).$addExtension;
-                $this->tempFile = explode("?", $this->tempFile)[0];
-
-                return true;
-            }
+          $newImageData = $this->download($url);
+          if ($newImageData) {
+              $this->tempFile = basename($url);
+              return IOHelper::writeToFile($this->tempFile, $newImageData);
+          }
         }
         return false;
     }
 
-    public function downloadImage($url) {
-        $newImageData = $this->download($url);
-        return IOHelper::writeToFile($this->tempFile, $newImageData);
-    }
-
-    public function moveImage($folderId) {
-        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, $folderId);
+    /**
+     * Move the image to your image destination (this can be for example S3)
+     * @param  integer $folderId  to save it to the folderid folder
+     * @param  string  $imageId   the instagram imageid for the filename
+     * @return boolean            return if it got a response in a boolean
+     */
+    public function moveImage($folderId=0, $imageId='') {
+        $extension = '.'.IOHelper::getExtension($this->tempFile);
+        $filename = (string)$imageId.$extension;
+        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $filename, (int)$folderId);
         if (!empty($response)) {
             return true;
         } else {
@@ -91,6 +93,10 @@ class InstaCraft_FileService extends BaseApplicationComponent
         }
     }
 
+    /**
+     * Remove the temporary image
+     * @return boolean return if the deletion of the file has success
+     */
     public function removeTmpImage() {
         return $this->deleteTempFiles($this->tempFile);
     }
@@ -130,14 +136,15 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Scrape the json from an instagram page and return this to an array
-     * @param  string $url  You need to put a valid instagram url in this variable
-     * @return mixed        This will return an array with instagram profile images
+     * @param  integer $folderId [description]
+     * @param  string  $url      You need to put a valid instagram url in this variable
+     * @return mixed             This will return an array with instagram profile images
      */
-    public function scrape($url=null)
+    public function scrape($folderId=0, $url=null)
     {
         $data = $this->download($url);
 
-        // instagram html/js to json
+        // instagram html/js to loopable array
         if ($data) {
             $data = explode('window._sharedData = ', $data)[1];
             $data = explode(';</script>', $data)[0];
@@ -148,8 +155,16 @@ class InstaCraft_FileService extends BaseApplicationComponent
                 $userMedia = $user->user->media;
                 if (!empty($userMedia)) {
                     $profileImages = array();
-                    foreach ($userMedia->nodes as $image) {
-                        $profileImages[] = $image->display_src;
+                    foreach ($userMedia->nodes as $key => $image) {
+                        $instagramUrl = explode('?', $image->display_src)[0];
+                        // if the file not exists in source
+                        // TODO fix the extension .jpg
+                        $fileFound = craft()->assets->findFile(array('folderId' => $folderId, 'filename' => $image->id.'.jpg'));
+                        if (!$fileFound) {
+                            $profileImages[$key]['display_src'] = $instagramUrl;
+                            $profileImages[$key]['caption'] = $image->caption;
+                            $profileImages[$key]['id'] = $image->id;
+                        }
                     }
                 }
             }
@@ -164,7 +179,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Delete a file
-     * @param string
      */
     private function deleteTempFiles($fileName)
     {

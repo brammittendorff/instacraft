@@ -1,0 +1,17 @@
+{% import "_includes/forms" as forms %}
+
+<p>
+    {{ forms.textField({
+      label: 'Cronjob Url'|t,
+      name: 'cronjobUrl',
+      value: settings.cronjobUrl,
+      instructions: 'Enter an absolute url, ex: https://www.instagram.com/nerdsandcompany/'
+    }) }}
+
+    {{ forms.textField({
+      label: 'Cronjob Folder Id'|t,
+      name: 'cronjobFolderId',
+      value: settings.cronjobFolderId,
+      instructions: 'Enter a folder id, ex: 4'
+    }) }}
+</p>

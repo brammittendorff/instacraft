@@ -12,7 +12,9 @@ class InstaCraft_FileTask extends BaseTask
     {
         return array(
             'folderId' => AttributeType::Number,
+            'imageId' => AttributeType::String,
             'url' => AttributeType::String,
+            'text' => AttributeType::String,
         );
     }
 
@@ -31,7 +33,7 @@ class InstaCraft_FileTask extends BaseTask
      */
     public function getTotalSteps()
     {
-        return 4;
+        return 3;
     }
 
     /**
@@ -45,15 +47,12 @@ class InstaCraft_FileTask extends BaseTask
 
         switch ($step) {
             case 0:
-                return craft()->instaCraft_file->renameImage($settings->url);
-            break;
-            case 1:
                 return craft()->instaCraft_file->downloadImage($settings->url);
             break;
-            case 2:
-                return craft()->instaCraft_file->moveImage($settings->folderId);
+            case 1:
+                return craft()->instaCraft_file->moveImage($settings->folderId, $settings->imageId);
             break;
-            case 3:
+            case 2:
                 return craft()->instaCraft_file->removeTmpImage();
             break;
         }

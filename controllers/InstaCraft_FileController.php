@@ -5,6 +5,9 @@ class InstaCraft_FileController extends BaseController
 {
     protected $allowAnonymous = array('actionDownload');
 
+    /**
+     * Trigger the download
+     */
     public function actionDownload()
     {
         $url = craft()->request->getPost('url');
