@@ -83,8 +83,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
      * @return boolean            return if it got a response in a boolean
      */
     public function moveImage($folderId=0, $imageId='') {
-        $extension = '.'.IOHelper::getExtension($this->tempFile);
-        $filename = (string)$imageId.$extension;
+        $filename = (string)$imageId.'.jpg';
         $response = craft()->assets->insertFileByLocalPath($this->tempFile, $filename, (int)$folderId);
         if (!empty($response)) {
             return true;
