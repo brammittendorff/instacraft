@@ -4,9 +4,20 @@ An automatic instagram image puller for <a href="https://craftcms.com/" target="
 
 # Installation
 
+## Composer
+
 You can install this plugin with composer. This will install your plugin automatically in the craft plugins folder.
 
 ```composer require brammittendorff/instacraft```
+
+## Git
+
+You can install this plugin with git to you just need to clone this repo into your craft plugins folder:
+
+```cd craft/plugins/```
+
+```git clone https://github.com/brammittendorff/instacraft.git```
+
 
 # Scheduled tasks
 
