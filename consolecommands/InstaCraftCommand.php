@@ -12,10 +12,13 @@ class InstaCraftCommand extends BaseCommand
     {
         $settings = craft()->plugins->getPlugin('instacraft')->getSettings();
 
-        craft()->instaCraft_file->save($settings['cronjobFolderId'], $settings['cronjobUrl']);
-
-        Craft::log(Craft::t('Running cronjob.'));
-
-        return true;
+        if (!empty($settings['cronjobFolderId']) && !empty($settings['cronjobUrl'])) {
+          craft()->instaCraft_file->save($settings['cronjobFolderId'], $settings['cronjobUrl']);
+          Craft::log(Craft::t('Running cronjob.'));
+          return true;
+        } else {
+          Craft::log(Craft::t('Please fill in the plugin settings.'));
+          return false;
+        }
     }
 }
