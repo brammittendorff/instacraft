@@ -47,10 +47,10 @@ class InstaCraft_FileTask extends BaseTask
 
         switch ($step) {
             case 0:
-                return craft()->instaCraft_file->downloadImage($settings->url);
+                return craft()->instaCraft_file->downloadImage($settings->url, $settings->imageId);
             break;
             case 1:
-                return craft()->instaCraft_file->moveImage($settings->folderId, $settings->imageId);
+                return craft()->instaCraft_file->moveImage($settings->folderId);
             break;
             case 2:
                 return craft()->instaCraft_file->removeTmpImage();

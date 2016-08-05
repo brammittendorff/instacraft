@@ -60,16 +60,17 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Download the image
-     * @param  string $url  A url to download
-     * @return mixed        return if it saved the image
+     * @param  string $url      A url to download
+     * @param  string $imageId  the instagram imageid for the filename
+     * @return mixed            return if it saved the image
      */
-    public function downloadImage($url) {
+    public function downloadImage($url, $imageId='') {
         $size = getimagesize($url);
         // if image is valid in php
         if (!empty($size) && !empty($size["mime"])) {
           $newImageData = $this->download($url);
           if ($newImageData) {
-              $this->tempFile = basename($url);
+              $this->tempFile = (string)$imageId.'.jpg';
               return IOHelper::writeToFile($this->tempFile, $newImageData);
           }
         }
@@ -79,12 +80,10 @@ class InstaCraft_FileService extends BaseApplicationComponent
     /**
      * Move the image to your image destination (this can be for example S3)
      * @param  integer $folderId  to save it to the folderid folder
-     * @param  string  $imageId   the instagram imageid for the filename
      * @return boolean            return if it got a response in a boolean
      */
-    public function moveImage($folderId=0, $imageId='') {
-        $filename = (string)$imageId.'.jpg';
-        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $filename, (int)$folderId);
+    public function moveImage($folderId=0) {
+        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, (int)$folderId);
         if (!empty($response)) {
             return true;
         } else {
