@@ -157,7 +157,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
                         $instagramUrl = explode('?', $image->display_src)[0];
                         // if the file not exists in source
                         // TODO fix the extension .jpg
-                        $fileFound = craft()->assets->findFile(array('folderId' => $folderId, 'filename' => $image->id.'.jpg'));
+                        $fileFound = $this->fileExists($folderId, $image->id);
                         if (!$fileFound) {
                             $profileImages[$key]['display_src'] = $instagramUrl;
                             $profileImages[$key]['caption'] = $image->caption;
@@ -173,6 +173,16 @@ class InstaCraft_FileService extends BaseApplicationComponent
         }
 
         return false;
+    }
+
+    /**
+     * If the file exists in the source
+     * @param  integer $folderId The id of the source it is located in
+     * @param  string  $imageId  The instagram id of the image
+     * @return boolean           If it exists or not
+     */
+    public function fileExists($folderId=0, $imageId='') {
+        return craft()->assets->findFile(array('folderId' => $folderId, 'filename' => $imageId.'.jpg'));
     }
 
     /**
