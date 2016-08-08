@@ -10,6 +10,13 @@ class InstaCraftCommand extends BaseCommand
      */
     public function actionRun()
     {
+        // run the tasks again for stuck tasks
+        $tasks = craft()->tasks->getAllTasks();
+        foreach ($tasks as $task)
+        {
+          craft()->tasks->rerunTaskById($task->id);
+        }
+
         $settings = craft()->plugins->getPlugin('instacraft')->getSettings();
 
         if (!empty($settings['cronjobFolderId']) && !empty($settings['cronjobUrl'])) {
