@@ -66,7 +66,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
         if (!empty($size) && !empty($size["mime"])) {
           $newImageData = $this->download($url);
           if (!empty($newImageData)) {
-              return IOHelper::writeToFile((string)$imageId.'.jpg', $newImageData);
+              return IOHelper::writeToFile(CRAFT_STORAGE_PATH.(string)$imageId.'.jpg', $newImageData);
           }
         }
         return false;
@@ -79,7 +79,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
      * @return boolean            return if it got a response in a boolean
      */
     public function moveImage($folderId=0, $imageId='') {
-        $response = craft()->assets->insertFileByLocalPath((string)$imageId.'.jpg', (string)$imageId.'.jpg', (int)$folderId);
+        $response = craft()->assets->insertFileByLocalPath(CRAFT_STORAGE_PATH.(string)$imageId.'.jpg', (string)$imageId.'.jpg', (int)$folderId);
         if (!empty($response)) {
             return true;
         } else {
