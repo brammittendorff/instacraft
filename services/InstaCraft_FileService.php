@@ -20,8 +20,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     public static $headers;
 
-    private $tempFile;
-
     private $mimeTypes = array(
         'image/gif'    => '.gif',
         'image/jpeg'    => '.jpg',
@@ -30,15 +28,14 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Create a task to save an image to a specified folder / source
-     * @param  int $folderId    The id of the folder where the images must be stored
-     * @param  string $url      The url of the instagram image
-     * @return boolean          Returns true if every url in the list is looped
+     * @param  int $folderId    the id of the folder where the images must be stored
+     * @param  string $url      the url of the instagram image
+     * @return boolean          returns true if every url in the list is looped
      */
     public function save($folderId, $url)
     {
         if (!filter_var($url, FILTER_VALIDATE_URL) === false) {
             $list = $this->scrape($folderId, $url);
-
             if ($list) {
                 foreach ($list as $object) {
                     craft()->tasks->createTask('InstaCraft_File', Craft::t('Downloading: ').$object['display_src'], array(
@@ -52,7 +49,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
                     craft()->userSession->setNotice(Craft::t('Downloading started.'));
                 }
             }
-
             return true;
         }
         return false;
@@ -60,7 +56,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Download the image
-     * @param  string $url      A url to download
+     * @param  string $url      a url to download
      * @param  string $imageId  the instagram imageid for the filename
      * @return mixed            return if it saved the image
      */
@@ -69,9 +65,8 @@ class InstaCraft_FileService extends BaseApplicationComponent
         // if image is valid in php
         if (!empty($size) && !empty($size["mime"])) {
           $newImageData = $this->download($url);
-          if ($newImageData) {
-              $this->tempFile = (string)$imageId.'.jpg';
-              return IOHelper::writeToFile($this->tempFile, $newImageData);
+          if (!empty($newImageData)) {
+              return IOHelper::writeToFile((string)$imageId.'.jpg', $newImageData);
           }
         }
         return false;
@@ -80,10 +75,11 @@ class InstaCraft_FileService extends BaseApplicationComponent
     /**
      * Move the image to your image destination (this can be for example S3)
      * @param  integer $folderId  to save it to the folderid folder
+     * @param  string  $imageId   the instagram image id
      * @return boolean            return if it got a response in a boolean
      */
-    public function moveImage($folderId=0) {
-        $response = craft()->assets->insertFileByLocalPath($this->tempFile, $this->tempFile, (int)$folderId);
+    public function moveImage($folderId=0, $imageId='') {
+        $response = craft()->assets->insertFileByLocalPath((string)$imageId.'.jpg', (string)$imageId.'.jpg', (int)$folderId);
         if (!empty($response)) {
             return true;
         } else {
@@ -93,18 +89,19 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Remove the temporary image
+     * @param  string $imageId the instagram id of and image to remove
      * @return boolean return if the deletion of the file has success
      */
-    public function removeTmpImage() {
-        return $this->deleteTempFiles($this->tempFile);
+    public function removeTmpImage($imageId='') {
+        return $this->deleteTempFiles((string)$imageId.'.jpg');
     }
 
     /**
      * Download an url with a random useragent
-     * @param  string $url          The url to download
-     * @param  boolean $saveHeaders If you want the headers to be stored in a static variable set this to true
-     * @param  string $proxy        You can put a proxy here to make requests with a proxy
-     * @return mixed                This returns false if the url is empty. And this will return the request result if everything is going well
+     * @param  string $url          the url to download
+     * @param  boolean $saveHeaders if you want the headers to be stored in a static variable set this to true
+     * @param  string $proxy        you can put a proxy here to make requests with a proxy
+     * @return mixed                this returns false if the url is empty. And this will return the request result if everything is going well
      */
     private function download($url, $saveHeaders=false, $proxy=null)
     {
@@ -134,9 +131,9 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * Scrape the json from an instagram page and return this to an array
-     * @param  integer $folderId [description]
-     * @param  string  $url      You need to put a valid instagram url in this variable
-     * @return mixed             This will return an array with instagram profile images
+     * @param  integer $folderId the folder id to check if the file exists
+     * @param  string  $url      you need to put a valid instagram url in this variable
+     * @return mixed             this will return an array with instagram profile images
      */
     public function scrape($folderId=0, $url=null)
     {
@@ -176,13 +173,18 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
     /**
      * If the file exists in the source
-     * @param  integer $folderId The id of the source it is located in
-     * @param  string  $imageId  The instagram id of the image
-     * @return boolean           If it exists or not
+     * @param  integer $folderId the id of the source it is located in
+     * @param  string  $imageId  the instagram id of the image
+     * @return boolean           if the filename exists or not
      */
     public function fileExists($folderId=0, $imageId='') {
         // TODO fix the extension .jpg
-        return craft()->assets->findFile(array('folderId' => $folderId, 'filename' => $imageId.'.jpg'));
+        $file = craft()->assets->findFile(array('folderId' => $folderId, 'filename' => $imageId.'.jpg'));
+        if (!empty($file->filename) && $file->filename == $imageId.'.jpg') {
+          return true;
+        } else {
+          return false;
+        }
     }
 
     /**

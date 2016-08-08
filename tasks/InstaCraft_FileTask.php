@@ -43,17 +43,17 @@ class InstaCraft_FileTask extends BaseTask
      */
     public function runStep($step)
     {
+        $settings = $this->getSettings();
         if(!craft()->instaCraft_file->fileExists($settings->folderId, $settings->imageId)) {
-          $settings = $this->getSettings();
           switch ($step) {
               case 0:
                   return craft()->instaCraft_file->downloadImage($settings->url, $settings->imageId);
               break;
               case 1:
-                  return craft()->instaCraft_file->moveImage($settings->folderId);
+                  return craft()->instaCraft_file->moveImage($settings->folderId, $settings->imageId);
               break;
               case 2:
-                  return craft()->instaCraft_file->removeTmpImage();
+                  return craft()->instaCraft_file->removeTmpImage($settings->imageId);
               break;
           }
         }
