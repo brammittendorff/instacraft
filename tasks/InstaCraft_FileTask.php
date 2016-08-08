@@ -57,5 +57,6 @@ class InstaCraft_FileTask extends BaseTask
               break;
           }
         }
+        return true;
     }
 }
