@@ -93,7 +93,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
      * @return boolean return if the deletion of the file has success
      */
     public function removeTmpImage($imageId='') {
-        return $this->deleteTempFiles((string)$imageId.'.jpg');
+        return $this->deleteTempFiles(CRAFT_STORAGE_PATH.(string)$imageId.'.jpg');
     }
 
     /**
