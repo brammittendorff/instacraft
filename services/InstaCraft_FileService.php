@@ -135,7 +135,7 @@ class InstaCraft_FileService extends BaseApplicationComponent
      * @param  string  $url      you need to put a valid instagram url in this variable
      * @return mixed             this will return an array with instagram profile images
      */
-    public function scrape($folderId=0, $url=null)
+public function scrape($folderId=0, $url=null)
     {
         $data = $this->download($url);
 
@@ -147,16 +147,17 @@ class InstaCraft_FileService extends BaseApplicationComponent
             $json = json_decode($data);
 
             foreach ($json->entry_data->ProfilePage as $user) {
-                $userMedia = $user->user->media;
+                $userMedia = $user->graphql->user->edge_owner_to_timeline_media;
                 if (!empty($userMedia)) {
                     $profileImages = array();
-                    foreach ($userMedia->nodes as $key => $image) {
-                        $instagramUrl = explode('?', $image->display_src)[0];
+                    foreach ($userMedia->edges as $key => $edge) {
+                        $image = $edge->node;
+                        $instagramUrl = $image->display_url;
                         // if the file not exists in source
                         $fileFound = $this->fileExists($folderId, $image->id);
                         if (!$fileFound) {
                             $profileImages[$key]['display_src'] = $instagramUrl;
-                            $profileImages[$key]['caption'] = $image->caption;
+                            $profileImages[$key]['caption'] = $image->edge_media_to_caption->edges[0]->node->text;
                             $profileImages[$key]['id'] = $image->id;
                         }
                     }
@@ -170,7 +171,6 @@ class InstaCraft_FileService extends BaseApplicationComponent
 
         return false;
     }
-
     /**
      * If the file exists in the source
      * @param  integer $folderId the id of the source it is located in
